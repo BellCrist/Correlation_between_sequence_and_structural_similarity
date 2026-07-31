@@ -31,23 +31,25 @@ class SequenceSimilarityAlignmentFree:
             labels.append(pdb_id)
         # seq_obj = SeqRecords(labels, sequence_list)
 
-        seq_lengths = [len(s) for s in sequence_list]
         # 2. Utilizzo della classe WordPattern per l'estrazione dei k-mer
+        # con i relativi conteggi e frequenze.
         # k: lunghezza della parola amminoacidica (es. 3 per tripeptidi)
         wp = word_pattern.create(sequence_list, k)
+        seq_lengths = [len(s) for s in sequence_list]
+
+        # Creo l'oggetto word_vector per la costruzione della matrice dei conteggi delle sequenze
         word_vector_object = word_vector.Counts(seq_lengths, wp)
 
         # 3. Utilizzo della classe D2 per il calcolo della matrice di distanza
         d2_obj = word_d2.Distance(word_vector_object.data)
-        #TODO ciclare il dataset e per ogni coppia di sequenze (da passare al metodo pwdist_d2) ci salviamo lo score
+
+        # 4. Ciclo tutte le sequenze con un doppio for per eseguire il calcolo della distanza d2
         alignment_free_scores = {}
         n = len(labels)
-        for i in range(n):
-            for j in range(i+1, n):
-                score = d2_obj.pwdist_d2(i, j)
-                alignment_free_scores[tuple(sorted([labels[i], labels[j]]))] = score
-                print(alignment_free_scores)
-                sys.exit()
+        for seq1_index in range(n):
+            for seq2_index in range(seq1_index+1, n):
+                score = d2_obj.pwdist_d2(seq1_index, seq2_index)
+                alignment_free_scores[tuple(sorted([labels[seq1_index], labels[seq2_index]]))] = score
 
         # # 4. Organizzazione dei risultati in un DataFrame Pandas con etichette
         # df_dist = pd.DataFrame(dist_matrix, index=labels, columns=labels)
