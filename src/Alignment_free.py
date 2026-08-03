@@ -10,8 +10,10 @@ from alfpy import word_d2
 
 class SequenceSimilarityAlignmentFree:
 
-    @staticmethod
-    def calcola_distanza_alfpy(df_csv, k=3):
+    def __init__(self):
+        self.labels = []
+
+    def calcola_distanza_d2(self, df_csv, k=3):
         """
         Calcola la matrice delle distanze D2 tra le sequenze contenute nel DataFrame
         utilizzando le classi WordPattern e D2 della libreria ALFPY.
@@ -19,7 +21,6 @@ class SequenceSimilarityAlignmentFree:
 
         sequence = ''
         sequence_list = []
-        labels = []
 
         # 1. Parsing delle sequenze e creazione degli oggetti Seq di alfpy
         for idx, row in df_csv.iterrows():
@@ -28,7 +29,7 @@ class SequenceSimilarityAlignmentFree:
 
             # Istanza della classe Seq di alfpy
             sequence_list.append(sequence)
-            labels.append(pdb_id)
+            self.labels.append(pdb_id)
         # seq_obj = SeqRecords(labels, sequence_list)
 
         # 2. Utilizzo della classe WordPattern per l'estrazione dei k-mer
@@ -45,12 +46,13 @@ class SequenceSimilarityAlignmentFree:
 
         # 4. Ciclo tutte le sequenze con un doppio for per eseguire il calcolo della distanza d2
         alignment_free_scores = {}
-        n = len(labels)
+        n = len(self.labels)
         for seq1_index in range(n):
             for seq2_index in range(seq1_index+1, n):
                 score = d2_obj.pwdist_d2(seq1_index, seq2_index)
-                alignment_free_scores[tuple(sorted([labels[seq1_index], labels[seq2_index]]))] = score
+                alignment_free_scores[tuple(sorted([self.labels[seq1_index], self.labels[seq2_index]]))] = score
 
-        # # 4. Organizzazione dei risultati in un DataFrame Pandas con etichette
-        # df_dist = pd.DataFrame(dist_matrix, index=labels, columns=labels)
-        # return df_dist
+        return alignment_free_scores
+
+    def get_labels(self):
+        return self.labels
