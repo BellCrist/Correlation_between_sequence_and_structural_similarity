@@ -8,15 +8,15 @@ import pandas as pd
 from Structure_similarity_score import StructureSimilarity
 
 if __name__ == '__main__':
+    # print("Conversione file Fasta al csv...")
     # convertitore = FastaDatasetConversion()
-    # convertitore.fasta_to_csv_conversion()
+    # if convertitore.fasta_to_csv_conversion():
+    #     print("Conversione completata con successo")
+    # else:
+    #     print("Conversione non riuscita")
 
-    # Algoritmo Smith Waterman all-against-all
     smithWaterman = SmithWatermanScore()
-    self_scores = {}
-    smith_waterman_scores = {}
     d2_distance = {}
-    tm_scores = {}
 
 # Calcolo della distanza d2 tra le sequenze del dataset
     print("Esecuzione algoritmo d2 distance...\n")
@@ -24,36 +24,12 @@ if __name__ == '__main__':
     alignment_free = SequenceSimilarityAlignmentFree()
     d2_distance_scores = alignment_free.calcola_distanza_d2(df)
 
-# Calcolo della similarità di sequenza tramite NSWS
+# Calcolo della similarità di sequenza tramite NSWS (All-against-all)
     print("Esecuzione algoritmo NSWS...\n")
-    with open('Storage/Files/wood_pearson_dataset.csv', mode='r') as file:
-        fileRows = list(csv.DictReader(file))
-        # Per ogni sequenza del dataset eseguo il confronto con tutte le altre
-        for row in fileRows:
-            seq1 = row['Sequence']
-            pdbId1 = row['PDB_ID']
-            for record in fileRows:
-                seq2 = record['Sequence']
-                pdbId2 = record['PDB_ID']
-                if pdbId1 == pdbId2:
-                    self_scores[pdbId1] = smithWaterman.sequence_identity(seq1, seq2)
-                else:
-                    # Utilizzo tuple ordinate per evitare record duplicati che hanno stesso valore ma chiave invertita
-                    smith_waterman_scores[tuple(sorted([pdbId1, pdbId2]))] = smithWaterman.sequence_identity(seq1, seq2)
-
-        normalized_scores = smithWaterman.normalized_score(smith_waterman_scores, self_scores)
-
-    # with open('Storage/Files/wood_pearson_dataset.csv', mode='r') as dataset:
-    #     fileRows = list(csv.DictReader(dataset))
-    #     for row in fileRows:
-    #         pdbId1 = row['PDB_ID']
-    #         for record in fileRows:
-    #             pdbId2 = record['PDB_ID']
-    #             if pdbId1 != pdbId2:
-    #                 print(pdbId1+" - "+pdbId2)
-    #                 print(f"D2 distance: {d2_distance_scores[tuple(sorted([pdbId1, pdbId2]))]} \n"
-    #                       f"NSWS: {normalized_scores[tuple(sorted([pdbId1, pdbId2]))]}")
-    #                 sys.exit()
+    smithWaterman.sequence_identity()
+    dataset_file_path = 'Storage/Files/wood_pearson_dataset.csv'
+    self_scores, smith_waterman_scores = smithWaterman.sequence_identity(dataset_file_path)
+    normalized_scores = smithWaterman.normalized_score(smith_waterman_scores, self_scores)
 
 # Calcolo del TM-score per la similarità strutturale
     print("Calcolo similarità strutturale...")
